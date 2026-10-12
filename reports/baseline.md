@@ -1,5 +1,5 @@
-# Baseline — điền trong checkpoint 1
+# Baseline — checkpoint 1
 
-1. Agent có identity mỗi run chưa? Dẫn file/hàm:
-2. Ai cho phép `http_post`? Dẫn file/hàm:
-3. Nếu gửi sai PII ra sink, bằng chứng ở đâu? Dẫn file/hàm:
+1. Agent có identity mỗi run chưa? **Chưa.** `agent/loop.py:27` `_naive_loop(message, llm)` không nhận principal, không tạo `run_id`/`agent_id`; `agent/loop.py:31-44` gọi `tools.search_docs`, `tools.read_customer`, `tools.http_post` không kèm danh tính nào. (`principal_id` chỉ có ở `run_once`, `agent/loop.py:57`, và bị bỏ qua trên đường baseline `agent/loop.py:74`.)
+2. Ai cho phép `http_post`? **Không ai.** `agent/loop.py:35-44`: chỉ cần `llm.find_injection()` thấy chỉ thị trong text ticket là `tools.http_post(injected.target_url, ...)` chạy ngay, URL do attacker đặt. Không có policy/PEP nào quyết định. Allowlist ở `agent/tools.py:68-83` `http_post` chỉ giữ lab an toàn, không phải kiểm soát cấp quyền.
+3. Nếu gửi sai PII ra sink, bằng chứng ở đâu? **Không có bằng chứng phía agent.** `_naive_loop` (`agent/loop.py:27-54`) không ghi ledger/audit; `agent/loop.py:44` chỉ POST rồi `agent/loop.py:54` trả summary. Dấu vết duy nhất nằm ở phía nhận, `reports/sink.log` do `sink/sink.py` ghi.
