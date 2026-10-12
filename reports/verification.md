@@ -12,7 +12,7 @@
   - Thiếu `requests`/`pip-tools`: cài bằng pip.
   - Hook `gitleaks-system` mặc định chạy `gitleaks git ...` nên nối thêm `args` thành 2 đối số và báo lỗi: ghi đè `entry` thành `gitleaks dir --config .gitleaks.toml --redact` trong `.pre-commit-config.yaml`.
   - `reports/ledger.jsonl` ban đầu chưa có: tạo bằng cách chạy agent `--as dpo` sau khi runner an toàn.
-- **Lỗi/giới hạn còn lại:** mock LLM, principal giả lập, regex PII (test set tổng hợp), ledger một file không phát hiện cắt đuôi; `dpo` vẫn đọc hợp lệ hồ sơ KH-000999, chỉ `http_post` bị chặn. Luật 91/2025/QH15 (`91qh.signed.pdf`) và NĐ 356/2025/NĐ-CP (`356-nd.signed.pdf`): đã đối chiếu các điều trích dẫn với bản gốc. Danh mục OWASP ASI 2026: đã đối chiếu với trang tóm tắt của DeepTeam, **NOT_VERIFIED** với trang gốc OWASP. Luật AI 134/2025/QH15: **NOT_VERIFIED** (chưa có văn bản gốc, xem `reports/compliance-mapping.md`). Chạy trên Windows native, chưa chạy trong WSL2/Linux: **NOT_VERIFIED** trên môi trường đó.
+- **Lỗi/giới hạn còn lại:** mock LLM, principal giả lập, regex PII (test set tổng hợp), ledger một file không phát hiện cắt đuôi; `dpo` vẫn đọc hợp lệ hồ sơ KH-000999, chỉ `http_post` bị chặn. Luật 91/2025/QH15 (`91qh.signed.pdf`), NĐ 356/2025/NĐ-CP (`356-nd.signed.pdf`) và Luật AI 134/2025/QH15 (`luat134.signed.pdf`): đã đối chiếu các điều trích dẫn với bản gốc. Danh mục OWASP ASI 2026: đã đối chiếu với trang tóm tắt của DeepTeam, **NOT_VERIFIED** với trang gốc OWASP. Luật AI 134/2025/QH15: **NOT_VERIFIED** (chưa có văn bản gốc, xem `reports/compliance-mapping.md`). Chạy trên Windows native, chưa chạy trong WSL2/Linux: **NOT_VERIFIED** trên môi trường đó.
 
 ## CP3a — PII gate (`agent/pii.py`)
 
