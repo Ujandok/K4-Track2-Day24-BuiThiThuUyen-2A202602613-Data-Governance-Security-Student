@@ -1,10 +1,18 @@
-# Verification — điền trước khi nộp
+# Verification — checkpoint 5
 
-- OS / Python / Gitleaks version:
-- `python -m pytest tests/ -q`:
-- `pre-commit run --all-files`:
-- Ledger verify:
-- Các lỗi còn lại:
+- **OS / Python / Gitleaks:** Windows 11 (PowerShell + Git Bash, không dùng WSL2 như README khuyến nghị) / Python 3.14.7 / Gitleaks 8.30.1 (`gitleaks version`).
+- **`python -m pytest tests/ -q --basetemp=.pytest_tmp`:** `33 passed`, 0 skipped, 0 failed.
+- **`python -m agent.check_lure corpus/ticket-90*.md`:** `4/4 lure sẵn sàng`.
+- **`pre-commit run --all-files`:** `Detect hardcoded secrets...Passed`.
+- **Gitleaks:** `gitleaks git --config .gitleaks.toml --redact .` → 1 finding, exit 1 (rule `lab24-synthetic-token`, commit `1bdd849`, token giả như dự kiến); `gitleaks dir --config .gitleaks.toml --redact .` → no leaks, exit 0. Chi tiết: `reports/secrets-incident.md`.
+- **Before/after:** `reports/attack-before.log` 4 dòng, mỗi dòng là POST chứa record giả của KH-000999. `reports/attack-after.log` = **0 byte**, tạo sau khi reset sink lần hai và chạy `python -m agent.loop --mock --as dpo "Tổng hợp các ticket còn mở tuần này"` qua runner mới.
+- **Ledger:** `reports/ledger.jsonl` 23 dòng, `verify()` → `True`; mọi dòng có `reason`; có `http_post` decision=deny, `on_behalf_of=dpo` (dòng 23), `search_docs` allow (dòng 1) và `read_customer` allow (dòng 2).
+- **Lỗi đã gặp và cách sửa:**
+  - Windows console lỗi `UnicodeEncodeError` khi in tiếng Việt: đặt `PYTHONUTF8=1`.
+  - Thiếu `requests`/`pip-tools`: cài bằng pip.
+  - Hook `gitleaks-system` mặc định chạy `gitleaks git ...` nên nối thêm `args` thành 2 đối số và báo lỗi: ghi đè `entry` thành `gitleaks dir --config .gitleaks.toml --redact` trong `.pre-commit-config.yaml`.
+  - `reports/ledger.jsonl` ban đầu chưa có: tạo bằng cách chạy agent `--as dpo` sau khi runner an toàn.
+- **Lỗi/giới hạn còn lại:** mock LLM, principal giả lập, regex PII (test set tổng hợp), ledger một file không phát hiện cắt đuôi; `dpo` vẫn đọc hợp lệ hồ sơ KH-000999, chỉ `http_post` bị chặn. Điều khoản pháp luật cụ thể: **NOT_VERIFIED** (chưa đọc văn bản gốc, xem `reports/compliance-mapping.md`). Chạy trên Windows native, chưa chạy trong WSL2/Linux: **NOT_VERIFIED** trên môi trường đó.
 
 ## CP3a — PII gate (`agent/pii.py`)
 

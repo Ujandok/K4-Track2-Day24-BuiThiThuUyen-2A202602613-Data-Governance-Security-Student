@@ -1,10 +1,14 @@
-# Compliance mapping — điền trong checkpoint 5
+# Compliance mapping — checkpoint 5
 
-| Nguồn / yêu cầu | Control đã làm | Evidence file:dòng | Giới hạn |
+Bảng này ánh xạ **control kỹ thuật của bài lab** sang các nguồn đề yêu cầu. Nó không phải chứng nhận tuân thủ. Mọi dữ liệu trong bài là dữ liệu giả, chạy bằng `--mock` và principal mô phỏng.
+
+| Nguồn / chủ đề | Control đã làm | Bằng chứng (file:dòng) | Giới hạn |
 |---|---|---|---|
-| Luật 91/2025/QH15 | | | |
-| NĐ 356/2025/NĐ-CP | | | |
-| Luật AI 134/2025/QH15 | | | |
-| OWASP ASI01, ASI03, ASI04 | | | |
+| Luật 91/2025/QH15 | Che PII (CCCD, SĐT, STK, email) trước khi nội dung ticket đi tiếp; chỉ đọc hồ sơ khi có principal + mục đích; ghi lại mọi truy cập. | `agent/pii.py:50` (`detect`), `agent/pii.py:86` (`redact`), `agent/runner.py:148` (redact trước khi tóm tắt), `agent/runner.py:160-169` (kiểm quyền trước `read_customer`) | **Chưa xác minh điều khoản cụ thể**: chưa đọc văn bản gốc nên không trích dẫn điều/khoản nào. Chỉ nêu tên văn bản theo đề bài. |
+| NĐ 356/2025/NĐ-CP | Hạn chế mục đích (`purposes` theo principal), phân loại `restricted`, ledger để truy vết. | `data/principals.json`, `agent/policy.py:79-80` (restricted + egress bị deny), `agent/policy.py:96-97` (kiểm mục đích), `reports/ledger.jsonl:2` (read_customer allow của dpo) | **Chưa xác minh điều khoản cụ thể**. Không có cơ chế đồng ý của chủ thể dữ liệu, thời hạn lưu trữ hay xoá dữ liệu trong lab. |
+| Luật AI 134/2025/QH15 | Ghi nhận và giám sát hành vi của agent: mỗi tool call có danh tính (`on_behalf_of`), `run_id`, quyết định và lý do. | `agent/runner.py:83-125` (`_Gate.ask`), `agent/ledger.py:59` (`append`), `agent/ledger.py:72` (`verify`), `reports/ledger.jsonl:1-23` | **Chưa xác minh điều khoản cụ thể**. Mock LLM không phải hệ thống AI thật; không đánh giá rủi ro hay phân loại hệ thống AI theo luật. |
+| OWASP ASI01 (chiếm quyền mục tiêu agent / prompt injection) | 4 lure; trifecta split: Run A đọc ticket nhưng không chạm hồ sơ hay egress; Run B chỉ nhận số ticket lấy từ tên file, tra `related_tickets`. | `agent/runner.py:76`, `agent/runner.py:128-135` (ticket id từ tên file), `agent/runner.py:138-150` (Run A), `agent/runner.py:153-157` (tra `related_tickets`), `reports/attack-before.log:1-4` (rò rỉ trước), `reports/attack-after.log` (0 byte, sau) | Chống được kịch bản trong lab. Một khách gắn với ticket (KH-000999) vẫn được `dpo` đọc hợp lệ; chặn dựa vào policy ở bước gửi. Mock nhận diện injection bằng marker, không đại diện model thật. |
+| OWASP ASI03 (lạm dụng danh tính/đặc quyền) | OBO: quyền hiệu lực = giao của `allowed_tools`, `agent_scopes`, `parent_scopes`; kiểm mục đích và TTL; `support_l1` bị chặn đọc hồ sơ. | `agent/policy.py:72-106` (`check`), `data/principals.json`, `agent/runner.py:93-125`, `tests/test_obo.py` | `--as` chỉ mô phỏng principal, không phải xác thực thật. Quyền lấy từ file tĩnh. |
+| OWASP ASI04 (chuỗi cung ứng agent) | Pin Gitleaks v8.30.1 trong hook; `requirements.lock` có hash; quét lịch sử tìm token giả. | `.pre-commit-config.yaml:1-9`, `requirements.lock`, `reports/secrets-incident.md`, `tests/test_supply_chain.py` | Chỉ phủ phụ thuộc Python và secret trong repo; không phủ tool/MCP server bên ngoài hay model. Pin và hook không thay thế việc rotate secret đã lộ. |
 
-Chỉ ghi điều khoản cụ thể khi đã đối chiếu văn bản gốc. Mô phỏng kỹ thuật không tự chứng minh tuân thủ pháp luật.
+Tên ASI01/03/04 ghi theo hiểu biết của người làm bài về danh mục OWASP cho ứng dụng agent, chưa đối chiếu lại với tài liệu gốc tại <https://genai.owasp.org>.
