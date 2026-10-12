@@ -75,7 +75,7 @@ def detect(text: str) -> list[dict]:
             kind = "VN_BANK_ACCOUNT"
         add(kind, m.start(), m.end())
 
-    # SĐT có dấu phân cách (0912 345 678, 091-234-5678), chưa bị dãy liền bắt.
+    # SĐT có dấu phân cách (0912 345 678, 091-234-5678)
     for m in _PHONE_RE.finditer(text):
         if not _overlaps(m.start(), m.end(), taken):
             add("VN_PHONE", m.start(), m.end())
@@ -84,7 +84,6 @@ def detect(text: str) -> list[dict]:
 
 
 def redact(text: str) -> str:
-    # Thay từ cuối về đầu để offset của entity phía trước không bị lệch.
     for e in sorted(detect(text), key=lambda e: e["start"], reverse=True):
         text = text[: e["start"]] + f"[REDACTED_{e['type']}]" + text[e["end"] :]
     return text

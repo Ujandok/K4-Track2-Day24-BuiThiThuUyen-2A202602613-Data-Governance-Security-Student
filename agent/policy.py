@@ -76,7 +76,6 @@ def check(context: PolicyContext) -> tuple[bool, str]:
     if c.data_classification not in CLASSIFICATIONS:
         return False, f"deny: data_classification không hợp lệ ({c.data_classification!r})"
 
-    # Rule tối thiểu: áp cho mọi principal, kể cả dpo.
     if c.data_classification == "restricted" and c.egress_enabled:
         return False, "deny: dữ liệu restricted không được đi cùng egress (kể cả principal đủ quyền)"
 
