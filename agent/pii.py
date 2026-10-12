@@ -30,10 +30,61 @@ set ở tests/vn_pii_testset.jsonl):
 """
 from __future__ import annotations
 
+import re
+
+_EMAIL_RE = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}")
+# SĐT: 0 + 9 chữ số, cho phép dấu cách/chấm/gạch ngang giữa các nhóm.
+_PHONE_RE = re.compile(r"(?<![\d-])0\d{2,3}[ .-]?\d{3}[ .-]?\d{3,4}(?![\d-])")
+_DIGITS_RE = re.compile(r"(?<![\d@.\w-])\d{8,16}(?![\d@\w-])")
+
+# Ngữ cảnh ngay trước dãy số quyết định CCCD hay STK (cùng là dãy số dài).
+_CCCD_CTX = re.compile(r"(cccd|cmnd|căn cước|can cuoc)\W{0,12}$", re.IGNORECASE)
+_BANK_CTX = re.compile(r"(stk|tài khoản|tai khoan|tk|account)\W{0,12}$", re.IGNORECASE)
+_PHONE_CTX = re.compile(r"(sđt|sdt|điện thoại|dien thoai|phone|hotline)\W{0,12}$", re.IGNORECASE)
+
+
+def _overlaps(start: int, end: int, taken: list[tuple[int, int]]) -> bool:
+    return any(start < e and s < end for s, e in taken)
+
 
 def detect(text: str) -> list[dict]:
-    raise NotImplementedError("BƯỚC 3a: implement PII detection")
+    entities: list[dict] = []
+    taken: list[tuple[int, int]] = []
+
+    def add(kind: str, start: int, end: int) -> None:
+        entities.append({"type": kind, "start": start, "end": end})
+        taken.append((start, end))
+
+    for m in _EMAIL_RE.finditer(text):
+        add("EMAIL", m.start(), m.end())
+
+    for m in _DIGITS_RE.finditer(text):
+        if _overlaps(m.start(), m.end(), taken):
+            continue
+        before = text[max(0, m.start() - 30) : m.start()]
+        digits = m.group()
+        if _CCCD_CTX.search(before):
+            kind = "VN_CCCD"
+        elif _BANK_CTX.search(before):
+            kind = "VN_BANK_ACCOUNT"
+        elif _PHONE_CTX.search(before) or (len(digits) == 10 and digits[0] == "0"):
+            kind = "VN_PHONE"
+        elif len(digits) == 12:
+            kind = "VN_CCCD"
+        else:
+            kind = "VN_BANK_ACCOUNT"
+        add(kind, m.start(), m.end())
+
+    # SĐT có dấu phân cách (0912 345 678, 091-234-5678), chưa bị dãy liền bắt.
+    for m in _PHONE_RE.finditer(text):
+        if not _overlaps(m.start(), m.end(), taken):
+            add("VN_PHONE", m.start(), m.end())
+
+    return sorted(entities, key=lambda e: e["start"])
 
 
 def redact(text: str) -> str:
-    raise NotImplementedError("BƯỚC 3a: implement PII redaction")
+    # Thay từ cuối về đầu để offset của entity phía trước không bị lệch.
+    for e in sorted(detect(text), key=lambda e: e["start"], reverse=True):
+        text = text[: e["start"]] + f"[REDACTED_{e['type']}]" + text[e["end"] :]
+    return text
