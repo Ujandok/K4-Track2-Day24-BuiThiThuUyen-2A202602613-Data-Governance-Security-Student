@@ -1,0 +1,9 @@
+repos:
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.1
+    hooks:
+      - id: gitleaks-system
+        # Quét file hiện tại của repo; lịch sử quét riêng bằng `gitleaks git`.
+        entry: gitleaks dir --config .gitleaks.toml --redact
+        args: ["."]
+        pass_filenames: false
