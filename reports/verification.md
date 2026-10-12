@@ -12,7 +12,7 @@
   - Thiếu `requests`/`pip-tools`: cài bằng pip.
   - Hook `gitleaks-system` mặc định chạy `gitleaks git ...` nên nối thêm `args` thành 2 đối số và báo lỗi: ghi đè `entry` thành `gitleaks dir --config .gitleaks.toml --redact` trong `.pre-commit-config.yaml`.
   - `reports/ledger.jsonl` ban đầu chưa có: tạo bằng cách chạy agent `--as dpo` sau khi runner an toàn.
-- **Lỗi/giới hạn còn lại:** mock LLM, principal giả lập, regex PII (test set tổng hợp), ledger một file không phát hiện cắt đuôi; `dpo` vẫn đọc hợp lệ hồ sơ KH-000999, chỉ `http_post` bị chặn. Điều khoản pháp luật cụ thể: **NOT_VERIFIED** (chưa đọc văn bản gốc, xem `reports/compliance-mapping.md`). Chạy trên Windows native, chưa chạy trong WSL2/Linux: **NOT_VERIFIED** trên môi trường đó.
+- **Lỗi/giới hạn còn lại:** mock LLM, principal giả lập, regex PII (test set tổng hợp), ledger một file không phát hiện cắt đuôi; `dpo` vẫn đọc hợp lệ hồ sơ KH-000999, chỉ `http_post` bị chặn. Luật 91/2025/QH15: đã đối chiếu các điều trích dẫn với bản gốc `91qh.signed.pdf`. NĐ 356/2025/NĐ-CP, Luật AI 134/2025/QH15 và danh mục OWASP ASI: **NOT_VERIFIED** (chưa có văn bản gốc, xem `reports/compliance-mapping.md`). Chạy trên Windows native, chưa chạy trong WSL2/Linux: **NOT_VERIFIED** trên môi trường đó.
 
 ## CP3a — PII gate (`agent/pii.py`)
 

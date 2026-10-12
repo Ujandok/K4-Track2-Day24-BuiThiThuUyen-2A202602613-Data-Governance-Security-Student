@@ -1,6 +1,6 @@
 # DPIA-lite — checkpoint 5
 
-Bản mô tả học tập, **không phải** hồ sơ đánh giá tác động theo quy định pháp luật.
+Bản mô tả học tập, **không phải** hồ sơ đánh giá tác động xử lý dữ liệu cá nhân theo Điều 21 Luật 91/2025/QH15 (hồ sơ chính thức phải gửi cơ quan chuyên trách).
 
 1. **Loại dữ liệu và phân loại:** 26 hồ sơ khách tổng hợp trong `data/customers.json` (tên, CCCD, SĐT, STK, email, `related_tickets`) được coi là `restricted`; ticket trong `corpus/` (45 file) là nội dung không tin cậy, phân loại `internal`. Không có dữ liệu cá nhân thật.
 2. **Mục đích xử lý và principal:** `support_l1` chỉ tìm ticket (`summarize-tickets`, `support-reply`), không được đọc hồ sơ. `dpo` được tìm ticket và đọc hồ sơ cho `support-reply` (`data/principals.json`). Principal chỉ là bản mô phỏng chọn bằng `--as`, không có xác thực.
